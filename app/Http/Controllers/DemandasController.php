@@ -22,13 +22,21 @@ class DemandasController extends Controller
 
     public function getDemandas(Request $request)
     {
+        // Por descrição de demanda
+
+        // Tipo opcional, caso não insira nenhum, listará todos os tipos
         try {
-            $perPage = 10;
+            $perPage = 5;
             $page = $request->input('page', 1);
+            $info = $request->input('info');
 
-            $url = $this->apiUrl;
+            $url = $this->apiUrl. '?TIPO=2';
 
-            $response = $this->client->get($url . '?TIPO=2', [
+            if ($info) {
+                $url.= '&INFO='. $info;
+            }
+
+            $response = $this->client->get($url, [
                 'auth' => [
                     env('PROTHEUS_API_USER'), 
                     env('PROTHEUS_API_PASSWORD')
@@ -38,16 +46,16 @@ class DemandasController extends Controller
             $demandas = json_decode($response->getBody(), true);
             $offset = ($page - 1) * $perPage; 
 
-            $newDemandas = [];
-            foreach ($demandas as $demanda) {
-                $newDemandas[] = [
-                    'codigo' => $demanda['codigo'],
-                    'descricao' => $demanda['descricao'],
-                    'descricaoweb' => $demanda['descricaoweb'],
-                ];
-            }
+            // $newDemandas = [];
+            // foreach ($demandas as $demanda) {
+            //     $newDemandas[] = [
+            //         'codigo' => $demanda['codigo'],
+            //         'descricao' => $demanda['descricao'],
+            //         'descricaoweb' => $demanda['descricaoweb'],
+            //     ];
+            // }
 
-            $items = array_slice($newDemandas, $offset, $perPage);
+            $items = array_slice($demandas, $offset, $perPage);
 
             $response = [
                 'data' => $items,
@@ -68,6 +76,7 @@ class DemandasController extends Controller
 
     public function getDemanda($cod)
     {
+        // Por código de demandas
         $demanda = null;
         $url = $this->apiUrl;
 
