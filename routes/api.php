@@ -20,12 +20,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::controller(DemandasController::class)->group(function () {
-    Route::get('/demandas', 'getDemandas'); // Rota para listar demandas
-    Route::get('/demandas/{id}', 'getDemanda'); // Rota para obter uma demanda específica
-
-    Route::post('/demandas', 'createDemanda'); // Rota para criar uma demanda
-
-    Route::put('/demandas/{id}', 'updateDemanda'); // Rota para atualizar uma demanda
-    
-    Route::delete('/demandas/{id}', 'deleteDemanda'); // Rota para deletar uma demanda
+    Route::get('/demandas', 'getDemandas');
+    Route::get('/demanda/{id}', 'getDemanda'); 
+    Route::post('/demanda', 'createDemanda'); 
+    Route::put('/demanda/{id}', 'updateDemanda'); 
+    Route::delete('/demanda/{id}', 'deleteDemanda');
 });
