@@ -3,8 +3,7 @@
 namespace App\Http\Controllers;
 
 use GuzzleHttp\Client;
-use Illuminate\Http\Request; // Importe a classe Request
-use Illuminate\Support\Collection; 
+use Illuminate\Http\Request;
 
 class DemandasController extends Controller
 {
@@ -26,7 +25,7 @@ class DemandasController extends Controller
 
         // Tipo opcional, caso não insira nenhum, listará todos os tipos
         try {
-            $perPage = 5;
+            $perPage = 20;
             $page = $request->input('page', 1);
             $info = $request->input('info');
 
@@ -46,19 +45,19 @@ class DemandasController extends Controller
             $demandas = json_decode($response->getBody(), true);
             $offset = ($page - 1) * $perPage; 
 
-            // $newDemandas = [];
-            // foreach ($demandas as $demanda) {
-            //     $newDemandas[] = [
-            //         'codigo' => $demanda['codigo'],
-            //         'descricao' => $demanda['descricao'],
-            //         'descricaoweb' => $demanda['descricaoweb'],
-            //     ];
-            // }
+            $newDemandas = [];
+            foreach ($demandas as $demanda) {
+                $newDemandas[] = [
+                    'codigo' => $demanda['codigo'],
+                    'descricao' => $demanda['descricao'],
+                    'descricaoweb' => $demanda['descricaoweb'],
+                ];
+            }
 
             $items = array_slice($demandas, $offset, $perPage);
 
             $response = [
-                'data' => $items,
+                $items,
                 'pagination' => [
                     'current_page' => $page,
                     'per_page' => $perPage,
