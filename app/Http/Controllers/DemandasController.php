@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ServerException;
 use Illuminate\Http\Request;
 
 class DemandasController extends Controller
@@ -21,9 +22,6 @@ class DemandasController extends Controller
 
     public function getDemandas(Request $request)
     {
-        // Por descrição de demanda
-
-        // Tipo opcional, caso não insira nenhum, listará todos os tipos
         try {
             $perPage = 20;
             $page = $request->input('page', 1);
@@ -75,7 +73,6 @@ class DemandasController extends Controller
 
     public function getDemanda($cod)
     {
-        // Por código de demandas
         $demanda = null;
         $url = $this->apiUrl;
 
@@ -94,6 +91,85 @@ class DemandasController extends Controller
             } else {
                 return response()->json(['message' => 'Demanda não encontrada'], 404);
             }
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage(),
+                'protheus_response' => [
+                    'status_code' => $response->getStatusCode(),
+                    'body' => $response->getBody()->getContents(),
+                ]
+            ], 500);
+        }
+    }
+
+    public function updateDemanda(Request $request, $cod)
+    {
+        $url = $this->apiUrl; 
+
+        $objetoSimples = $request->all();
+        
+        try {
+            $promise = $this->client->putAsync($url, [
+                'auth' => [
+                    env('PROTHEUS_API_USER'),
+                    env('PROTHEUS_API_PASSWORD')
+                ],
+                'json' => $objetoSimples,
+                'headers' => [ 
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json', 
+                ]
+            ]);
+            
+            $promise->then(
+                function ($response) {
+                },
+                function ($exception) {
+                }
+            );
+            
+            $response = $promise->wait();
+
+            $demanda = json_decode($response->getBody(), true);
+            return $demanda;
+
+        } catch (ServerException $e) {
+            $response = $e->getResponse();
+            $errorBody = $response->getBody();
+            $statusCode = $response->getStatusCode();
+
+            $errorData = null;
+            try {
+                $errorData = json_decode($errorBody, true);
+            } catch (\Exception $ex) {
+            }
+
+
+            return response()->json(['error' => 'Erro ao comunicar com a API Protheus', 'details' => $errorData, 'status' => $statusCode], $statusCode); 
+
+        } catch (\Exception $e) { 
+            return response()->json(['error' => 'Erro geral: '. $e->getMessage()], 500);
+        }
+    }
+
+    public function deleteDemanda($cod)
+    {
+        $url = $this->apiUrl;
+
+        try {
+
+            $response = $this->client->delete($url, [
+                'auth' => [
+                    env('PROTHEUS_API_USER'),
+                    env('PROTHEUS_API_PASSWORD')
+                ],
+                'json' => $cod,
+                'headers' => [ 
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json', 
+                ]
+            ]);
 
         } catch (\Exception $e) {
             return response()->json([

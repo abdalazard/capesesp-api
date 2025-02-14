@@ -23,6 +23,6 @@ Route::controller(DemandasController::class)->group(function () {
     Route::get('/demandas', 'getDemandas');
     Route::get('/demanda/{cod}', 'getDemanda');
     Route::post('/demanda', 'createDemanda');
-    Route::put('/demanda/{cod}', 'updateDemanda');
+    Route::put('/demanda/{cod}', [DemandasController::class, 'updateDemanda'])->middleware('cors'); 
     Route::delete('/demanda/{cod}', 'deleteDemanda');
 });
