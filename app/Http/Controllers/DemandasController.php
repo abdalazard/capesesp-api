@@ -103,6 +103,47 @@ class DemandasController extends Controller
         }
     }
 
+    public function createDemanda(Request $request)
+    {
+        $url = $this->apiUrl; 
+
+        $objetoSimples = $request->all();
+        
+        try {
+            $promise = $this->client->post($url, [
+                'auth' => [
+                    env('PROTHEUS_API_USER'),
+                    env('PROTHEUS_API_PASSWORD')
+                ],
+                'json' => $objetoSimples,
+                'headers' => [ 
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json', 
+                ]
+            ]);
+            
+            $response = json_decode($promise->getBody(), true);
+            return $response;
+
+        } catch (ServerException $e) {
+            $response = $e->getResponse();
+            $errorBody = $response->getBody();
+            $statusCode = $response->getStatusCode();
+
+            $errorData = null;
+            try {
+                $errorData = json_decode($errorBody, true);
+            } catch (\Exception $ex) {
+            }
+
+
+            return response()->json(['error' => 'Erro ao comunicar com a API Protheus', 'details' => $errorData, 'status' => $statusCode], $statusCode); 
+
+        } catch (\Exception $e) { 
+            return response()->json(['error' => 'Erro geral: '. $e->getMessage()], 500);
+        }
+    }
+
     public function updateDemanda(Request $request, $cod)
     {
         $url = $this->apiUrl; 
