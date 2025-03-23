@@ -20,6 +20,14 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::controller(DemandasController::class)->group(function () {
+    Route::get('/teste', function() {
+        return response()->json([
+            'status' => 'success',
+            'message' => 'API está funcionando corretamente',
+            'timestamp' => now(),
+            'version' => '1.0'
+        ], 200);
+    }); 
     Route::get('/demandas', 'getDemandas');
     Route::get('/demanda/{cod}', 'getDemanda');
     Route::post('/demanda', 'createDemanda');
